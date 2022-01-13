@@ -2,8 +2,6 @@ import pygame
 import time
 import random
 
-from pygame.constants import RESIZABLE
-
 pygame.init()   #avvio pigame
 
 ##### VARIABILI GLOBALI #####
@@ -19,6 +17,7 @@ fps = pygame.time.Clock()
 pygame.display.set_caption('Snake') #imposto il titolo della finestra
 finesta_di_gioco = pygame.display.set_mode((finestra_x, finestra_y))    #creo la finestra di gioco
 
+font = "Product sans"
 
 ##### DEFINIZIONE COLORI #####
 nero = pygame.Color(0, 0, 0)
@@ -36,46 +35,63 @@ def genera_mela():
 	        random.randrange(1, (finestra_y // 10) - 1) * 10]
     return mela
 
-def mostra_punteggio(caso, colore, font, dimensione):
-    #creo un oggetto per memorizzare il font scelto per il punteggio
-    font_ = pygame.font.SysFont(font, dimensione)
-    
-    if caso == 0:
-        #creo la superficie sulla finestra all'interno della quale inserirò il punteggio di gioco
-        superficie_punteggio = font_.render(
-            'punteggio : ' + str(punteggio), True, colore)
-        
-        #creo un rettangolo all'interno del quale andrò ad inserire il punteggio
-        rettangolo_punteggio = superficie_punteggio.get_rect()
-        
-        #faccio visualizare il testo
-        finesta_di_gioco.blit(superficie_punteggio, rettangolo_punteggio)
-        
-    if caso == 1:
-        superficie_game_over = font_.render(
-		    'Game Over! : ' + str(punteggio), True, colore)
-        
-        #creo un rettangolo per contenere il testo
-        rettangolo_game_over = superficie_game_over.get_rect()
-        
-        # setting position of the text
-        rettangolo_game_over.midtop = (finestra_x/2, finestra_y/4)
-        
-        # blit wil draw the text on screen
-        finesta_di_gioco.blit(superficie_game_over, rettangolo_game_over)
-        pygame.display.flip()
 
-
+#definisco la funzione che consente all'utente di inserire il nickname
 def inserisci_nickname():
     return
-def termina_partita():
+
+
+#creo il menu di gioco
+def menu():
+    iter = True
+    selezionato = 'RESTART'
+
+    while iter:
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selezionato = 'RESTART'
+                elif event.key == pygame.K_DOWN:
+                    selezionato = 'QUIT'
+                if event.key == pygame.K_RETURN:
+                    if selezionato == 'RESTART':
+                       avvia_partita()
+                    if selezionato == 'QUIT':
+                        termina_partita()
+
+#definisco la funzione testo che mi consente di  
+def testo(contenuto, colore, font_, dimensione):
     
-    mostra_punteggio(1, rosso, 'Retro.ttf',50)
+    _font_=pygame.font.SysFont(font_, dimensione)
+    testo=_font_.render(contenuto, True, colore)
+
+    return testo
+
+def game_over():
+    #coloro lo sfondo della finestra di blu
+    finesta_di_gioco.fill(blu)
+    #mostro il punteggio finale sullo schermo
+    testo_ = testo('GAME OVER: ' + str(punteggio), rosso, font, 50)
+    
+    rettangolo_text = testo_.get_rect()
+
+    rettangolo_text.midtop = (finestra_x/2, finestra_y/4)
+
+    finesta_di_gioco.blit(testo_, rettangolo_text)
+    pygame.display.flip()
+    menu()
+
+def termina_partita():
 
     time.sleep(3)
 
     pygame.quit()
     exit()
+
+
 def avvia_partita():
 
     direzione = 'DESTRA'    #imposto come direzione di default 'DESTRA', 
@@ -160,17 +176,17 @@ def avvia_partita():
 
         #CONTROLLO DEI CASI IN CUI IL GIOCO POTREBBE TERMINARE
         #controllo se il serpente tocca i bordi della finestra
-        #in caso li tocchi invoco la funzione termina partita
+        #in caso li tocchi invoco la funzione game_over
         if posizione_serpente[0] < 0 or posizione_serpente[0] > finestra_x-10:
-            termina_partita()                                                   
+            game_over()                                                   
         if posizione_serpente[1] < 0 or posizione_serpente[1] > finestra_y-10:
-            termina_partita()
+            game_over()
 
         #controllo per ogni 'blocco' del serpente esclusa la 'testa' se viene toccato da quest'ulyima
-        #in caso affermativo invoco la funzione termina partita
+        #in caso affermativo invoco la funzione game_over
         for blocco in corpo_serpente[1:]:
             if posizione_serpente[0] == blocco[0] and posizione_serpente[1] == blocco[1]:
-                termina_partita()
+                game_over()
         
         ##### INTERFACCIA DI GIOCO #####
         #coloro lo sfondo della finestra di verde
@@ -186,8 +202,11 @@ def avvia_partita():
             posizione_mela[0], posizione_mela[1], 10, 10))
 
         #mostra continuamente il punteggio sullo schermo
-        mostra_punteggio(0, nero, 'Retro.ttf', 30)
 
+        punti = testo('Puntieggio: ' + str(punteggio), nero, font, 30)
+
+        rettangolo_punti = punti.get_rect()
+        finesta_di_gioco.blit( punti, rettangolo_punti)
 
         #refresh della schermata di gioco
         pygame.display.update()
