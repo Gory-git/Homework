@@ -2,6 +2,8 @@ import pygame
 import time
 import random
 
+from pygame.time import Clock
+
 pygame.init()   #avvio pigame
 
 ##### VARIABILI GLOBALI #####
@@ -17,7 +19,7 @@ fps = pygame.time.Clock()
 pygame.display.set_caption('Snake') #imposto il titolo della finestra
 finesta_di_gioco = pygame.display.set_mode((finestra_x, finestra_y))    #creo la finestra di gioco
 
-font = "Product sans"
+font = "Helvetica neue"
 
 ##### DEFINIZIONE COLORI #####
 nero = pygame.Color(0, 0, 0)
@@ -52,15 +54,36 @@ def menu():
                 termina_partita()           #invoco la funzione termina partita per arrestare il programa
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP or event.key == pygame.K_LEFT:
                     selezionato = 'RESTART'
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN or event.key == pygame.K_RIGHT:
                     selezionato = 'QUIT'
                 if event.key == pygame.K_RETURN:
                     if selezionato == 'RESTART':
                        avvia_partita()
                     if selezionato == 'QUIT':
                         termina_partita()
+        
+        if selezionato == 'RESTART':
+            testo_restart = testo('RESTART', bianco, font, 40)
+        else:
+            testo_restart = testo('RESTART', nero, font, 40)
+
+        if selezionato == 'QUIT':
+            testo_quit = testo('QUIT', bianco, font, 40)
+        else:
+            testo_quit = testo('QUIT',  nero, font, 40)
+        
+        rettangolo_restart = testo_restart.get_rect()
+        rettangolo_quit = testo_quit.get_rect()
+
+        rettangolo_restart.bottomleft = (finestra_x - 620, finestra_y -100)
+        rettangolo_quit.bottomright = (finestra_x -100, finestra_y -100)
+
+        finesta_di_gioco.blit(testo_restart, rettangolo_restart)
+        finesta_di_gioco.blit(testo_quit, rettangolo_quit)
+
+        pygame.display.update()
 
 #definisco la funzione testo che mi consente di  
 def testo(contenuto, colore, font_, dimensione):
@@ -71,8 +94,17 @@ def testo(contenuto, colore, font_, dimensione):
     return testo
 
 def game_over():
-    #coloro lo sfondo della finestra di blu
-    finesta_di_gioco.fill(blu)
+
+    suono = pygame.mixer.Sound('gameOverSoundEffects.webm')
+    pygame.mixer.music.load('gameOverSoundEffects.webm')
+    pygame.mixer.music.play(3)
+
+    time.sleep(3)   #sospendo il programma per 3 secondi
+
+    pygame.mixer.music.stop()
+
+    finesta_di_gioco.fill(blu)  #coloro lo sfondo della finestra di blu
+    
     #mostro il punteggio finale sullo schermo
     testo_game_over = testo('GAME OVER: ' + str(punteggio), rosso, font, 50)
     
@@ -86,8 +118,6 @@ def game_over():
     menu()
 
 def termina_partita():
-    
-    time.sleep(2)   #sospendo il programma per 3 secondi
 
     #arresto il programma
     pygame.quit()
