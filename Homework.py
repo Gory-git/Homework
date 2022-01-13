@@ -43,14 +43,14 @@ def inserisci_nickname():
 
 #creo il menu di gioco
 def menu():
-    iter = True
-    selezionato = 'RESTART'
+    selezionato = 'RESTART' #preseleziono come opzione START
 
-    while iter:
+    while True:
+        #catturo gli eventi da tastiera per potermi muovere nel menu
         for event in pygame.event.get():
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                quit()
+            if event.type == pygame.QUIT:   #se l'utente chiude la finestra con la crocetta
+                termina_partita()           #invoco la funzione termina partita per arrestare il programa
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     selezionato = 'RESTART'
@@ -74,20 +74,22 @@ def game_over():
     #coloro lo sfondo della finestra di blu
     finesta_di_gioco.fill(blu)
     #mostro il punteggio finale sullo schermo
-    testo_ = testo('GAME OVER: ' + str(punteggio), rosso, font, 50)
+    testo_game_over = testo('GAME OVER: ' + str(punteggio), rosso, font, 50)
     
-    rettangolo_text = testo_.get_rect()
+
+    rettangolo_text = testo_game_over.get_rect()
 
     rettangolo_text.midtop = (finestra_x/2, finestra_y/4)
 
-    finesta_di_gioco.blit(testo_, rettangolo_text)
+    finesta_di_gioco.blit(testo_game_over, rettangolo_text)
     pygame.display.flip()
     menu()
 
 def termina_partita():
+    
+    time.sleep(2)   #sospendo il programma per 3 secondi
 
-    time.sleep(3)
-
+    #arresto il programma
     pygame.quit()
     exit()
 
@@ -120,22 +122,22 @@ def avvia_partita():
         ##### CATTURO E GESTISCO GLI EVENTI DELL'UTENTE #####
         for event in pygame.event.get():    #catturo ogni evento della tastiera
             if event.type == pygame.QUIT:   #se l'evento è il click sulla crocetta per chiudere la finestra
-                termina_partita()           #arresto il programma
+                termina_partita()           #arresto il programma invocando la funzione termina_partita
                 
 
-            if event.type == pygame.KEYDOWN:       #se l'evento è un tasto della tasiera premuto
+            if event.type == pygame.KEYDOWN:       
 
-                if event.key == pygame.K_UP:       #e il tasto è la freccia in alto
-                    sposta_ = 'SU'                 #
+                if event.key == pygame.K_UP:       #se l'utente preme la freccia in alto
+                    sposta_ = 'SU'                 #assegno alla variabile spsta_ il valore SU
 
-                if event.key == pygame.K_DOWN:     #e il tasto è la freccia in basso
-                    sposta_ = 'GIU'                #
+                if event.key == pygame.K_DOWN:     #se l'utente preme la freccia in basso
+                    sposta_ = 'GIU'                #assegno alla variabile spsta_ il valore GIU
 
-                if event.key == pygame.K_LEFT:     #e il tasto è la freccia a sinistra
-                    sposta_ = 'SINISTRA'           #
+                if event.key == pygame.K_LEFT:     #se l'utente preme la freccia a sinistra
+                    sposta_ = 'SINISTRA'           #assegno alla variabile spsta_ il valore SINISTRA
 
-                if event.key == pygame.K_RIGHT:    #e il tasto è la freccia a destra
-                    sposta_ = 'DESTRA'             #
+                if event.key == pygame.K_RIGHT:    #se l'utente preme la freccia a destra
+                    sposta_ = 'DESTRA'             #assegno alla variabile spsta_ il valore DESTRA
 
         #gestisco il caso in cui l'utente dica al programma di spostare 
         #il serpente in una direzione opposta a quella attuale
@@ -150,7 +152,8 @@ def avvia_partita():
 
 
         #a questo punto posso cambiare la direzione del serpente
-        #in base alla direzione scelta cambio il valore della poszione del serpente di un'unità per volta
+        #in base alla direzione scelta incremento o decremento il 
+        #valore delle coordinate della testa del serpente
         if direzione == 'SU':
             posizione_serpente[1] -= 10
         if direzione == 'GIU':
@@ -161,20 +164,21 @@ def avvia_partita():
             posizione_serpente[0] += 10
 
         
-        #sistema di accrescimento del serpente
+        #sistema di accrescimento e movimento del serpente
         corpo_serpente.insert(0, list(posizione_serpente))                                              #aggiungo all'inizio del corpo del serpente un nuovo 'blocco' contenente
                                                                                                         #la posizione corrente della testa del serpente
-        if posizione_serpente[0] == posizione_mela[0] and posizione_serpente[1] == posizione_mela[1]:   #se il serpente tocca il futto lo lascio
-            esiste_mela = False                                                                         #assegnoo alla variabile 'esiste_mela' False in modo tale che successivamente io possa inserire un nuovo frutto
-            punteggio += 1                                                                              #e incremento il punteggio della partita
+        if posizione_serpente[0] == posizione_mela[0] and posizione_serpente[1] == posizione_mela[1]:   #se il serpente tocca la mela 
+                                                                                                        #lascio il blocco appena aggiunto al serpente
+            esiste_mela = False                                                                         #assegno alla variabile 'esiste_mela' False in modo tale che successivamente si inserisca un nuovo frutto
+            punteggio += 1                                                                              #e incremento il punteggio della partita 
         else:
             corpo_serpente.pop()                                                                        #altrimenti elimino l'iltimo elemento del corpo del serpente
-
-        if not esiste_mela:                 #controllo se la mela è stata toccata dal serpente o meno
+        
+        if not esiste_mela:                 #controllo se è attualmente presente una mela sul campo di gioco
             posizione_mela = genera_mela()  #in caso affermativo invoco la funzione genera_mela() per assegnare alla mela una nuova posizione all'interno della finestra di gioco
             esiste_mela = True              #e assegno alla variabile esiste_mela il valore true
 
-        #CONTROLLO DEI CASI IN CUI IL GIOCO POTREBBE TERMINARE
+        ##### CONTROLLO DEI CASI IN CUI IL GIOCO POTREBBE TERMINARE #####
         #controllo se il serpente tocca i bordi della finestra
         #in caso li tocchi invoco la funzione game_over
         if posizione_serpente[0] < 0 or posizione_serpente[0] > finestra_x-10:
