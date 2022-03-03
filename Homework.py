@@ -42,7 +42,6 @@ def genera_mela():
 def inserisci_nickname():
     return
 
-
 #creo il menu di gioco
 def menu():
     selezionato = 'RESTART' #preseleziono come opzione START
